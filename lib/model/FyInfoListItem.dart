@@ -1,12 +1,12 @@
 class FyInfoListItem{
-  String ODNO;
-  String PJNM;
-  String SHNO;
-  String SCARR;
+  String odno;
+  String pjnm;
+  String shno;
+  String scarr;
   FyInfoListItem(responseStr){
-    this.ODNO = responseStr['ODNO'];
-    this.PJNM = responseStr['PJNM'];
-    this.SHNO = responseStr['SHNO'];
-    this.SCARR = responseStr['SCARR'];
+    this.odno = responseStr['odno'];
+    this.pjnm = responseStr['pjnm'];
+    this.shno = responseStr['shno'];
+    this.scarr = responseStr['scarr'];
   }
 }

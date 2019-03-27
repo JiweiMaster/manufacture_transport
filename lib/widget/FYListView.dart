@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:manufacture_transport/ZXPage.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
@@ -30,7 +31,7 @@ class _FYListViewState extends State<FYListView>{
     if (list != null) {
       return GestureDetector(
           onTap: () {
-            print(list[position].PJNM);
+            print(list[position].pjnm);
             //跳转到下一个界面
             Navigator.push(
                 context,
@@ -52,15 +53,15 @@ class _FYListViewState extends State<FYListView>{
                       child: Row(
                         children: <Widget>[
                           Expanded(
-                            child: new Text(list[position].SHNO,maxLines: 2,),
+                            child: new Text(list[position].shno,maxLines: 2,),
                             flex: 2,
                           ),
                           Expanded(
-                            child: new Text(list[position].ODNO,maxLines: 2,),
+                            child: new Text(list[position].odno,maxLines: 2,),
                             flex: 2,
                           ),
                           Expanded(
-                            child: new Text(list[position].PJNM,maxLines: 2,),
+                            child: new Text(list[position].pjnm,maxLines: 2,),
                             flex: 3,
                           ),
                         ],
@@ -82,12 +83,24 @@ class _FYListViewState extends State<FYListView>{
           child: StreamBuilder<List<FyInfoListItem>>(
             stream: _streamController.stream,
             builder: (BuildContext context, AsyncSnapshot<List<FyInfoListItem>> snapshot){
-              return _buildListView(snapshot.data);
+              List<FyInfoListItem> list = snapshot.data;
+              if(list == null){
+                return _showLoading();
+              }else{
+                return (list.length>0)?_buildListView(snapshot.data):_showLoading();
+              }
             },
           ),
         ),
       ),
     );
   }
-
+  //显示加载菊花
+  Widget _showLoading(){
+    return Center(
+      child: CupertinoActivityIndicator(
+        radius: 20,
+      ),
+    );
+  }
 }

@@ -30,17 +30,27 @@ class _SelectorState extends State<Selector>{
       value: '1',
     );
     DropdownMenuItem dropdownMenuItem2=new DropdownMenuItem(
-      child:new Text('江宁区邮政局'),
+      child:new Text('邮政'),
       value: '2',
     );
     DropdownMenuItem dropdownMenuItem3=new DropdownMenuItem(
-      child:new Text('宅急送南京分公司'),
+      child:new Text('宅急送'),
       value: '3',
+    );
+    DropdownMenuItem dropdownMenuItem4=new DropdownMenuItem(
+      child:new Text('世捷物流'),
+      value: '4',
+    );
+    DropdownMenuItem dropdownMenuItem5=new DropdownMenuItem(
+      child:new Text('天恒'),
+      value: '5',
     );
     items.add(dropdownMenuItem0);
     items.add(dropdownMenuItem1);
     items.add(dropdownMenuItem2);
     items.add(dropdownMenuItem3);
+    items.add(dropdownMenuItem4);
+    items.add(dropdownMenuItem5);
     return items;
   }
   var value;
@@ -54,19 +64,22 @@ class _SelectorState extends State<Selector>{
         onChanged: (T){
           setState(() {
             value = T;
-            print(value);
           });
           String fycompany;
-          print("value=>"+value);
           if(value == '0'){
             fycompany = "";
           }else if(value == '1'){
             fycompany = "顺丰";
           }else if(value =='2'){
-            fycompany = "江宁区邮政局";
+            fycompany = "邮政";
           }else if(value == '3'){
-            fycompany = "宅急送南京分公司";
+            fycompany = "宅急送";
+          }else if(value == '4'){
+            fycompany = "世捷物流";
+          }else if(value == '5'){
+            fycompany = "天恒";
           }
+          _streamController.sink.add(List<FyInfoListItem>());
           getFYInfoByTransportCompany(fycompany);
         },
         elevation: 24,//设置阴影的高度
@@ -82,23 +95,20 @@ class _SelectorState extends State<Selector>{
   Future<void> getFYInfoByTransportCompany(String fycompany) async{
     List<FyInfoListItem> list = new List();
     var httpClient = new HttpClient();
-    print(fycompany);
     String url = NetApi.GET_FYINFO_BY_TRANSPORTCOMPANY+"?fycompany="+fycompany;
-    print(url);
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
     var responseBody = await response.transform(utf8.decoder).join();
     List mapJosn = json.decode(responseBody);
     Map titleMap = new Map();
-    titleMap['SHNO']='发运号';
-    titleMap['ODNO']='销售订单号';
-    titleMap['PJNM']='项目名称';
-    titleMap['SCARR']='承运商';
+    titleMap['shno']='发运号';
+    titleMap['odno']='销售订单号';
+    titleMap['pjnm']='项目名称';
+    titleMap['scarr']='承运商';
     list.add(FyInfoListItem(titleMap));
     mapJosn.forEach((map) => {
     list.add(FyInfoListItem(map))
     });
-    print(list);
     _streamController.sink.add(list);
   }
 

@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
 import 'package:manufacture_transport/model/NetApi.dart';
 import 'package:manufacture_transport/widget/FYListView.dart';
 import 'package:manufacture_transport/widget/Selector.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 /*
 需要一个能够选择发运商和发运时间的select
 显示的listview,显示的数据源来自于select的之后的网络请求
@@ -20,38 +22,45 @@ class FYPage extends StatefulWidget{
 
 class _FYPageState extends State<FYPage>{
   StreamController<List<FyInfoListItem>> _streamController = StreamController();
-  StreamController<bool> _streamControllerLoading = StreamController();
   @override
   void initState() {
-    // TODO: implement initState
-    _streamControllerLoading.sink.add(false);
+    _streamController.sink.add(List<FyInfoListItem>());
     getFYInfoByTransportCompany("");
     super.initState();
   }
   @override
   void dispose() {
     _streamController.close();
-    _streamControllerLoading.close();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
     return new Material(
       child: new Scaffold(
-        appBar: AppBar(title: Text("发运信息"),),
-//        body: _showList(_streamController)
-//        body: _showLoading(),
-        body: StreamBuilder<bool>(
-          stream: _streamControllerLoading.stream,
-            builder: (BuildContext context, AsyncSnapshot<bool> snapshot){
-
-              return snapshot.data == false ? _showLoading():_showList(_streamController);
-            },
+        appBar: AppBar(
+          title: Text("待发货"),
+          actions: <Widget>[
+            IconButton(icon: Icon(Icons.computer), onPressed: (){
+              clearLogin();
+            })
+          ],
         ),
+        body: _showList(_streamController)
       ),
     );
   }
 
+  void clearLogin() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("isFirstLogin", true);
+    exitApp();
+  }
+
+  Future<void> exitApp() async {
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+  }
+
+//初始化请求数据
   Future<void> getFYInfoByTransportCompany(String fycompany) async{
     List<FyInfoListItem> list = new List();
     var httpClient = new HttpClient();
@@ -63,19 +72,18 @@ class _FYPageState extends State<FYPage>{
     var responseBody = await response.transform(utf8.decoder).join();
     List mapJosn = json.decode(responseBody);
     Map titleMap = new Map();
-    titleMap['SHNO']='发运号';
-    titleMap['ODNO']='销售订单号';
-    titleMap['PJNM']='项目名称';
-    titleMap['SCARR']='承运商';
+    titleMap['shno']='发运号';
+    titleMap['odno']='销售订单号';
+    titleMap['pjnm']='项目名称';
+    titleMap['scarr']='承运商';
     list.add(FyInfoListItem(titleMap));
     mapJosn.forEach((map) => {
     list.add(FyInfoListItem(map))
     });
     print(list);
-    _streamControllerLoading.sink.add(true);
+    _streamController.sink.add(list);
   }
 }
-
 
 Widget _showList(_streamController){
   return new Column(
@@ -101,12 +109,6 @@ Widget _showList(_streamController){
   );
 }
 
-Widget _showLoading(){
-  return Center(
-    child: CupertinoActivityIndicator(
-      radius: 20,
-    ),
-  );
-}
+
 
 

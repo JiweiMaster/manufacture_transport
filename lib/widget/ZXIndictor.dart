@@ -5,8 +5,7 @@ import 'package:flutter/material.dart';
 class ZXIndictor extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Row(
+    return new Row(
         children: <Widget>[
           new Expanded(
             child: new Container(
@@ -59,7 +58,6 @@ class ZXIndictor extends StatelessWidget{
             flex: 1,
           ),
         ],
-      ),
-    );
+      );
   }
 }
