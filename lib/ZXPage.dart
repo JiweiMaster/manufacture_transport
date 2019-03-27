@@ -81,7 +81,7 @@ class ZXPage extends StatelessWidget {
       if(zxData.pknm == zxData.haveCode){
       }else{
         //需要发货和扫码数量对不上
-        content = content +zxData.mtno+"数据不吻合";
+        content = content +zxData.mtno+"发货扫码数据不吻合";
       }
     }
     return showDialog<void>(
