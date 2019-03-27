@@ -350,9 +350,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
   //获取fy单号对应的物料信息
   _GetTransportZXData(FyInfoListItem fyInfoListItem) async {
     try{
-      final String serverUrl = "http://218.94.37.243:8081";
-      final String FYNumberUrl = serverUrl+
-          "/winningBid/Service1.asmx/GetTransportZXData?fyNumber="+fyInfoListItem.shno;
+      final String FYNumberUrl = NetApi.GetTransportZXDataUrl+"?fyNumber="+fyInfoListItem.shno;
       zxlist.clear();
       var httpClient = new HttpClient();
       var request = await httpClient.getUrl(Uri.parse(FYNumberUrl));

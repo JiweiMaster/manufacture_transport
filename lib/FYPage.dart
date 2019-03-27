@@ -4,10 +4,15 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
+import 'package:manufacture_transport/model/MyUtil.dart';
 import 'package:manufacture_transport/model/NetApi.dart';
+import 'package:manufacture_transport/updateApp.dart';
 import 'package:manufacture_transport/widget/FYListView.dart';
 import 'package:manufacture_transport/widget/Selector.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 /*
 需要一个能够选择发运商和发运时间的select
@@ -22,6 +27,9 @@ class FYPage extends StatefulWidget{
 
 class _FYPageState extends State<FYPage>{
   StreamController<List<FyInfoListItem>> _streamController = StreamController();
+
+  bool ifRequestEver = false;
+
   @override
   void initState() {
     _streamController.sink.add(List<FyInfoListItem>());
@@ -35,6 +43,12 @@ class _FYPageState extends State<FYPage>{
   }
   @override
   Widget build(BuildContext context) {
+    //更新app的函数
+    if(ifRequestEver == false){
+      UpdateApp.getVersion(context);
+      ifRequestEver = true;
+    }
+
     return new Material(
       child: new Scaffold(
         appBar: AppBar(
@@ -49,6 +63,7 @@ class _FYPageState extends State<FYPage>{
       ),
     );
   }
+
 
   void clearLogin() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
