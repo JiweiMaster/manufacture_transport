@@ -284,10 +284,10 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                       child: new Text(
                                         zxlist[position].scarr,
                                         style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
-                                        maxLines: 1,
+                                        maxLines: 2,
                                       ),
                                     ),
-                                  flex: 1,
+                                  flex: 2,
                                 ),
                                 new Expanded(
                                   child: new Container(
@@ -297,7 +297,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                         style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
                                     ),
                                   ),
-                                  flex: 2,
+                                  flex: 3,
                                 ),
                                 new Expanded(
                                   child: new Container(

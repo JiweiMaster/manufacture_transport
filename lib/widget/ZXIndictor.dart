@@ -16,7 +16,7 @@ class ZXIndictor extends StatelessWidget{
                 maxLines: 1,
               ),
             ),
-            flex: 1,
+            flex: 2,
           ),
           new Expanded(
             child: new Container(
@@ -25,7 +25,7 @@ class ZXIndictor extends StatelessWidget{
                   "装箱序号",
               ),
             ),
-            flex: 2,
+            flex: 3,
           ),
           new Expanded(
             child: new Container(
