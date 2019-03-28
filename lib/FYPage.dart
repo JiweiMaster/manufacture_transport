@@ -45,7 +45,7 @@ class _FYPageState extends State<FYPage>{
   Widget build(BuildContext context) {
     //更新app的函数
     if(ifRequestEver == false){
-      UpdateApp.getVersion(context);
+//      UpdateApp.getVersion(context);
       ifRequestEver = true;
     }
 

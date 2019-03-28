@@ -60,7 +60,6 @@ class ZXPage extends StatelessWidget {
                 new Column(
                   children: <Widget>[
                     Container(
-                      height: 40,
                       child: ZXIndictor(),
                     ),
                     Expanded(
@@ -297,79 +296,90 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                 children: <Widget>[
                   new Container(
                       height: 50,
-//                      color: Colors.white,
-                      child: new Stack(
+//                      color: Colors.red,
+                      child: new Column(
                         children: <Widget>[
-                          new SizedBox(
-                            height: 49,
-                            child: new LinearProgressIndicator(
-                              value: (int.parse(zxlist[position].haveCode)/zxlist[position].maxValue),
-                              backgroundColor: Colors.transparent,
-                              valueColor: AlwaysStoppedAnimation(Color.fromARGB(255, 158, 158, 158)),
-                            ),
-                          ),
-                          new Align(
-                            alignment: new FractionalOffset(0.0, 0.5),
-                            child: new Row(
-                              children: <Widget>[
-                                new Expanded(
-                                  child: new Container(
-                                    margin: EdgeInsets.only(left: 5),
-                                    child:new Text(
-                                        zxlist[position].mtno,
-                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
-                                    ),
-                                  ),
-                                  flex: 2,
+                          new Stack(
+                            children: <Widget>[
+                              new SizedBox(
+                                height: 49,
+                                child: new LinearProgressIndicator(
+                                  value: (int.parse(zxlist[position].haveCode)/zxlist[position].maxValue),
+                                  backgroundColor: Colors.transparent,
+                                  valueColor: AlwaysStoppedAnimation(Color.fromARGB(255, 158, 158, 158)),
                                 ),
-                                new Expanded(
-                                    child: new Container(
-                                      margin: EdgeInsets.only(left: 5),
-                                      alignment: Alignment.centerLeft,
-                                      child: new Text(
-                                        zxlist[position].odnm,
-                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
-                                        maxLines: 2,
+                              ),
+                              Container(
+                                height: 49,
+                                child: new Align(
+                                  alignment: new FractionalOffset(0.0, 0.5),
+                                  child: new Row(
+                                    children: <Widget>[
+                                      new Expanded(
+                                        child: new Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          child:new Text(
+                                              zxlist[position].mtno,
+                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                          ),
+                                        ),
+                                        flex: 2,
                                       ),
-                                    ),
-                                  flex: 3,
-                                ),
+                                      new Expanded(
+                                        child: new Container(
+                                          margin: EdgeInsets.only(left: 5),
+                                          alignment: Alignment.centerLeft,
+                                          child: new Text(
+                                            zxlist[position].odnm,
+                                            style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
+                                            maxLines: 2,
+                                          ),
+                                        ),
+                                        flex: 3,
+                                      ),
 
-                                new Expanded(
-                                  child: new Container(
-                                    alignment: Alignment.center,
-                                    child: new Text(
-                                        zxlist[position].pknm,
-                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
-                                    ),
-                                    margin: EdgeInsets.only(right: 5),
+                                      new Expanded(
+                                        child: new Container(
+                                          alignment: Alignment.center,
+                                          child: new Text(
+                                              zxlist[position].pknm,
+                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                          ),
+                                          margin: EdgeInsets.only(right: 5),
+                                        ),
+                                        flex: 1,
+                                      ),
+                                      new Expanded(
+                                        child: new Container(
+                                          alignment: Alignment.center,
+                                          child: new Text(
+                                              zxlist[position].haveCode,
+                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                          ),
+                                          margin: EdgeInsets.only(right: 5),
+                                        ),
+                                        flex: 1,
+                                      ),
+                                      new Expanded(
+                                        child: new Container(
+                                          alignment: Alignment.center,
+                                          child: new Text(
+                                              (int.parse(zxlist[position].haveCode)-int.parse(zxlist[position].pknm)).toString(),
+                                              style: TextStyle(color:Colors.red)
+                                          ),
+                                          margin: EdgeInsets.only(right: 5),
+                                        ),
+                                        flex: 1,
+                                      ),
+                                    ],
                                   ),
-                                  flex: 1,
                                 ),
-                                new Expanded(
-                                  child: new Container(
-                                    alignment: Alignment.center,
-                                    child: new Text(
-                                        zxlist[position].haveCode,
-                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
-                                    ),
-                                    margin: EdgeInsets.only(right: 5),
-                                  ),
-                                  flex: 1,
-                                ),
-                                new Expanded(
-                                  child: new Container(
-                                    alignment: Alignment.center,
-                                    child: new Text(
-                                        (int.parse(zxlist[position].haveCode)-int.parse(zxlist[position].pknm)).toString(),
-                                        style: TextStyle(color:Colors.red)
-                                    ),
-                                    margin: EdgeInsets.only(right: 5),
-                                  ),
-                                  flex: 1,
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            height: 0.5,
+                            color: Color.fromARGB(255, 220, 220,220),
                           ),
                         ],
                       )
