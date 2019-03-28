@@ -6,7 +6,7 @@ import 'package:manufacture_transport/ZXPage.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
 import 'package:manufacture_transport/model/MyUtil.dart';
 
-
+List<FyInfoListItem> fyInfoListItems = new List();
 class FYListView extends StatefulWidget{
   FYListView(this._streamController);
   final StreamController<List<FyInfoListItem>> _streamController;
@@ -19,6 +19,12 @@ class FYListView extends StatefulWidget{
 class _FYListViewState extends State<FYListView>{
   _FYListViewState(this._streamController);
   final StreamController<List<FyInfoListItem>> _streamController;
+
+
+  @override
+  void initState() {
+
+  }
 
   Widget _buildListView(List<FyInfoListItem> list) {
     return ListView.builder(
@@ -36,8 +42,16 @@ class _FYListViewState extends State<FYListView>{
         new MaterialPageRoute(
           builder: (context) =>
           new ZXPage(fyInfoListItem:fyInfoListItem),));
-    if(result != null){
-      ToastUtil.print(result.toString());
+    if(result != null){//如果返回的是实际的数据单，那么就会将原来的发运单号置成灰色
+      for(FyInfoListItem data in fyInfoListItems){
+        if(data.shno == result){
+          data.isComplete = true;
+//          ToastUtil.print(result.toString());
+        }
+      }
+      List<FyInfoListItem> temp = new List();
+      temp.addAll(fyInfoListItems);
+      _streamController.sink.add(temp);
     }
   }
 
@@ -59,8 +73,8 @@ class _FYListViewState extends State<FYListView>{
               child: new Column(
                 children: <Widget>[
                   new Container(
+                    color: list[position].isComplete == true?Colors.grey:Color.fromARGB(255, 250, 250, 250),
                     height: 49,
-                    color: Colors.white,
                     padding: EdgeInsets.only(left: 10),
                     child: new Align(
                       alignment: new FractionalOffset(0.0, 0.5),
@@ -98,6 +112,11 @@ class _FYListViewState extends State<FYListView>{
             stream: _streamController.stream,
             builder: (BuildContext context, AsyncSnapshot<List<FyInfoListItem>> snapshot){
               List<FyInfoListItem> list = snapshot.data;
+              //数据添加到全局变量里面
+              fyInfoListItems.clear();
+              if(list!=null){
+                fyInfoListItems.addAll(list);
+              }
               if(list == null){
                 return _showLoading();
               }else{

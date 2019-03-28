@@ -3,6 +3,7 @@ class FyInfoListItem{
   String pjnm;
   String shno;
   String scarr;
+  bool isComplete = false;
   FyInfoListItem(responseStr){
     this.odno = responseStr['odno'];
     this.pjnm = responseStr['pjnm'];

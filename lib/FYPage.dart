@@ -27,7 +27,6 @@ class FYPage extends StatefulWidget{
 
 class _FYPageState extends State<FYPage>{
   StreamController<List<FyInfoListItem>> _streamController = StreamController();
-
   bool ifRequestEver = false;
 
   @override

@@ -4,11 +4,11 @@ class ZXIndictor extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      height: 40,
+      height: 50,
       child: new Column(
         children: <Widget>[
           Container(
-            height: 39.5,
+            height: 49.5,
             child: new Row(
               children: <Widget>[
                 new Expanded(

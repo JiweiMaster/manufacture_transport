@@ -22,13 +22,12 @@ class ZXPage extends StatelessWidget {
   ZXPage({Key key,@required this.fyInfoListItem}):super(key: key);
   final FyInfoListItem fyInfoListItem;
   TextEditingController _removeBillTextController = TextEditingController();
-  StreamController<bool> _streamControllerDialog = new StreamController();
   BuildContext context;
   @override
   Widget build(BuildContext context) {
     this.context = context;
     //初始化不显示加载框
-    _streamControllerDialog.sink.add(false);
+//    _streamControllerDialog.sink.add(false);
     return new WillPopScope(
         child: new Scaffold(
             appBar: new AppBar(
@@ -37,7 +36,6 @@ class ZXPage extends StatelessWidget {
               }),
               actions: <Widget>[
                 IconButton(icon: Icon(Icons.cloud_download),onPressed: (){
-
                   _connectRemoveBill();
                 },)
               ],
@@ -46,17 +44,6 @@ class ZXPage extends StatelessWidget {
 
             body: Stack(
               children: <Widget>[
-                new StreamBuilder<bool>(
-                    stream: _streamControllerDialog.stream,
-                    builder: (BuildContext context, AsyncSnapshot<bool> snapshot){
-                      return new ProgressDialog(
-                        loading: snapshot.data != null?snapshot.data:false,
-                        msg: '正在创建',
-                        child: Center(
-                        ),
-                      );
-                    }
-                ),
                 new Column(
                   children: <Widget>[
                     Container(
@@ -67,7 +54,7 @@ class ZXPage extends StatelessWidget {
                       flex: 1,
                     ),
                   ],
-                )
+                ),
               ],
             )
         ),
@@ -115,11 +102,10 @@ class ZXPage extends StatelessWidget {
               Navigator.of(context).pop();
             }, child: Text('取消关联')),
             new CupertinoButton(onPressed: () {
+              Navigator.of(context).pop();
               //进行网络操作去关联移库单
               String removeBill = _removeBillTextController.text.toString();//获取移库单号
               _connectRemoveBillRequest(removeBill);//去进行网络请求
-              Navigator.of(context).pop();
-
             }, child: Text('确认关联')),
           ],
         );
@@ -127,9 +113,23 @@ class ZXPage extends StatelessWidget {
     );
   }
 
+
+  Future<void> _showLoading(BuildContext context) async{
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context){
+          return CupertinoActivityIndicator(
+            radius: 20,
+          );
+        }
+    );
+  }
+
   //net request to connect 移库单
   Future<void> _connectRemoveBillRequest(removeBillText) async{
-    _streamControllerDialog.sink.add(true);
+//    _streamControllerDialog.sink.add(true);
+    _showLoading(context);
     //获取装箱号
     String ZXNumbers = "";
     for(ZXData data in zxlist){
@@ -142,15 +142,19 @@ class ZXPage extends StatelessWidget {
         +"?YKNumber="+removeBillText+"&ZXNumbers="+ZXNumbers));
     var response = await request.close();
     var responseBody = await response.transform(utf8.decoder).join();
-
-    ToastUtil.print(responseBody);
-    if(responseBody != ""){
-      _streamControllerDialog.sink.add(false);
+    Navigator.pop(context);
+    if(responseBody == "关联移库单成功"){
+      Navigator.pop(context,""+fyInfoListItem.shno);//将数据返回回去
+    }else if(responseBody == "关联移库单失败"){
+      ToastUtil.print("关联移库单失败");
+    }else{
+      ToastUtil.print(responseBody);
     }
 //    await Future.delayed(Duration(seconds: 2), () {
-//      _streamControllerDialog.sink.add(false);
 //    });
   }
+
+
 
   Future<bool> _exit(){
     _showAlert();
@@ -439,8 +443,6 @@ class ListViewAndScanState extends State<ListViewAndScan>{
             }else{
               ToastUtil.print("该码已经被扫描过");
             }
-          }else{
-            ToastUtil.print("未发现该装箱");
           }
         }
       }
