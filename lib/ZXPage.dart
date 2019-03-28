@@ -16,6 +16,7 @@ import 'package:manufacture_transport/widget/ZXIndictor.dart';
 
 String barcode = "";
 List<ZXData> zxlist = new List();
+List<String> allScanedCode = new List();
 //承运商
 class ZXPage extends StatelessWidget {
   ZXPage({Key key,@required this.fyInfoListItem}):super(key: key);
@@ -182,12 +183,18 @@ class ZXPage extends StatelessWidget {
 
 
 class ZXData{
-  ZXData(this.scarr,this.mtno,this.pknm,this.haveCode,this.maxValue);
+  ZXData(this.scarr,this.mtno,this.pknm,this.haveCode,this.maxValue,this.odno,this.odln,this.odnm,this.whls);
   String scarr;//承运商
   String mtno;//物料的名称
   String pknm;//数量
   String haveCode;
   double maxValue;
+
+  String odno;//销售订单号
+  String odln;//销售行数
+  String odnm;//销售物品名称
+  String whls;
+
 }
 
 class ListViewAndScan extends StatefulWidget{
@@ -250,10 +257,38 @@ class ListViewAndScanState extends State<ListViewAndScan>{
     );
   }
 
+  Future<void> showZXDetail(int position) async{
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return CupertinoAlertDialog(
+            title: Text('装箱详情'),
+            content: Column(
+              children: <Widget>[
+                new Text("装箱序号："+zxlist[position].mtno, style: new TextStyle(fontSize: 15),),
+                new Text("销售订单号："+zxlist[position].odno,style: new TextStyle(fontSize: 15),),
+                new Text("装箱内容："+zxlist[position].odnm,style: new TextStyle(fontSize: 15,),),
+                new Text("承运商："+zxlist[position].scarr,style: new TextStyle(fontSize: 15),),
+                new Text("库位："+zxlist[position].whls,style: new TextStyle(fontSize: 15),),
+              ],
+            ),
+            actions: <Widget>[
+              new CupertinoButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('确认')),
+            ],
+          );
+        });
+  }
+
   Widget _buildListViewItem(BuildContext context, int position){
     if (zxlist != null) {
       return GestureDetector(
           onTap: () {
+            showZXDetail(position);
           },
           child: Container(
               height: 50,
@@ -278,18 +313,6 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                             child: new Row(
                               children: <Widget>[
                                 new Expanded(
-                                    child: new Container(
-                                      margin: EdgeInsets.only(left: 5),
-                                      alignment: Alignment.centerLeft,
-                                      child: new Text(
-                                        zxlist[position].scarr,
-                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                  flex: 2,
-                                ),
-                                new Expanded(
                                   child: new Container(
                                     margin: EdgeInsets.only(left: 5),
                                     child:new Text(
@@ -297,8 +320,21 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                         style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
                                     ),
                                   ),
+                                  flex: 2,
+                                ),
+                                new Expanded(
+                                    child: new Container(
+                                      margin: EdgeInsets.only(left: 5),
+                                      alignment: Alignment.centerLeft,
+                                      child: new Text(
+                                        zxlist[position].odnm,
+                                        style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
+                                        maxLines: 2,
+                                      ),
+                                    ),
                                   flex: 3,
                                 ),
+
                                 new Expanded(
                                   child: new Container(
                                     alignment: Alignment.center,
@@ -358,7 +394,8 @@ class ListViewAndScanState extends State<ListViewAndScan>{
       var responseBody = await response.transform(utf8.decoder).join();
       List mapJosn = json.decode(responseBody);
       mapJosn.forEach((map) => {
-      zxlist.add(ZXData(fyInfoListItem.scarr,map['mtno'],map['pknm'],"0",double.parse(map['pknm'])))
+      zxlist.add(ZXData(fyInfoListItem.scarr,map['mtno'],map['pknm'],"0",
+          double.parse(map['pknm']),map['odno'],map['odln'],map['odnm'],map['whls']))
       });
       setState(() {
       });
@@ -374,22 +411,26 @@ class ListViewAndScanState extends State<ListViewAndScan>{
   //进行扫码工作
   Future scan() async {
     try {
-      String barcodeData = await BarcodeScanner.scan();
-      if(barcodeData.length != 10){
-        barcodeData = barcodeData.substring(0,10);
+      String barcodeDataLong = await BarcodeScanner.scan();
+      String barcodeDataShort;
+      //获取短码
+      if(barcodeDataLong.length != 10){
+        barcodeDataShort = barcodeDataLong.substring(0,10);
+      }else{
+        barcodeDataShort = barcodeDataLong;
       }
       setState((){
         for(var zxData in zxlist){
-          if(zxData.mtno == barcodeData){
+          if(zxData.mtno == barcodeDataShort){//判断短码是否符合条件
+            if(!allScanedCode.contains(barcodeDataLong)){
               zxData.haveCode = (int.parse(zxData.haveCode)+1).toString();
-            break;
+              allScanedCode.add(barcodeDataLong);//保留长码的扫描激励
+              break;
+            }else{
+              ToastUtil.print("该码已经被扫描过");
+            }
           }else{
-            Fluttertoast.showToast(
-              msg: "未发现该装箱："+barcodeData,
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.CENTER,
-              timeInSecForIos: 1,
-            );
+            ToastUtil.print("未发现该装箱");
           }
         }
       }
@@ -399,37 +440,17 @@ class ListViewAndScanState extends State<ListViewAndScan>{
         setState(() {
           barcode = 'permission refused error';
         });
-        Fluttertoast.showToast(
-          msg: "权限被拒绝",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-        );
+        ToastUtil.print("权限被拒绝");
       } else {
         setState(() => barcode = 'error');
-        Fluttertoast.showToast(
-          msg: "扫码失败",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-        );
+        ToastUtil.print("扫码失败");
       }
     } on FormatException{
       setState(() => barcode = 'back');
-      Fluttertoast.showToast(
-        msg: "未扫码",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-      );
+      ToastUtil.print("未扫码");
     } catch (e) {
       setState(() => barcode = 'error');
-      Fluttertoast.showToast(
-        msg: "扫码失败",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-      );
+      ToastUtil.print("扫码失败");
     }
   }
 }

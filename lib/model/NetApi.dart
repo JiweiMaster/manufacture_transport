@@ -11,7 +11,7 @@ class NetApi{
   static final String _connectRemoveHubBill = "/winningBid/Service1.asmx/ConnectYKNumber";
   static get connectRemoveHubBillUrl => StringServerurl+_connectRemoveHubBill;
 
-  static get appUpdateAndroidUrl => "http://106.14.14.212:8002/apk?app=制造物流扫码Android&format=json";
+  static get appUpdateAndroidUrl => "http://218.94.37.243:8081/winningBid/Service1.asmx/ManuTransAppDownload";
   static get appUpdateIOSUrl => "http://106.14.14.212:8002/apk?app=制造物流扫码Android&format=json";
 
 

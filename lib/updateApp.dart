@@ -39,8 +39,8 @@ class UpdateApp {
       updateUrl = NetApi.appUpdateIOSUrl;
     }
     var dio = new Dio();
-    Options options = Options(headers: {HttpHeaders.contentTypeHeader :"application/json"});
-    Response response = await dio.get(updateUrl,options: options);
+    Response response = await dio.get(updateUrl,
+        options: new Options(contentType: (ContentType.parse("application/x-www-form-urlencoded"))));
     var jsonRes = json.decode(response.data);
     versionUpdateModel = new VersionUpdateModel(jsonRes);
     PackageInfo packageInfo = await PackageInfo.fromPlatform();

@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:manufacture_transport/ZXPage.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
+import 'package:manufacture_transport/model/MyUtil.dart';
 
 
 class FYListView extends StatefulWidget{
@@ -27,17 +28,30 @@ class _FYListViewState extends State<FYListView>{
         });
   }
 
+  //进入下一个界面并且回去下一个界面返回的数据,
+  // 如果返回的是FY单号，代表单号已经完成发运操作，将当前的发运单号置灰
+  void enterZXPager(BuildContext context,fyInfoListItem ) async{
+    String result = await Navigator.push(
+        context,
+        new MaterialPageRoute(
+          builder: (context) =>
+          new ZXPage(fyInfoListItem:fyInfoListItem),));
+    if(result != null){
+      ToastUtil.print(result.toString());
+    }
+  }
+
   Widget _buildListViewItem(BuildContext context, List<FyInfoListItem> list, int position) {
     if (list != null) {
       return GestureDetector(
           onTap: () {
-            print(list[position].pjnm);
             //跳转到下一个界面
-            Navigator.push(
-                context,
-                new MaterialPageRoute(
-                    builder: (context) =>
-                    new ZXPage(fyInfoListItem: list[position]),));
+//            Navigator.push(
+//                context,
+//                new MaterialPageRoute(
+//                    builder: (context) =>
+//                    new ZXPage(fyInfoListItem: list[position]),));
+            enterZXPager(context,list[position]);
           },
           child: Container(
               height: 50,

@@ -10,10 +10,8 @@ class ZXIndictor extends StatelessWidget{
           new Expanded(
             child: new Container(
               margin: EdgeInsets.only(left: 5),
-              alignment: Alignment.centerLeft,
-              child: new Text(
-                "承运商",
-                maxLines: 1,
+              child:new Text(
+                  "装箱序号",
               ),
             ),
             flex: 2,
@@ -21,8 +19,10 @@ class ZXIndictor extends StatelessWidget{
           new Expanded(
             child: new Container(
               margin: EdgeInsets.only(left: 5),
-              child:new Text(
-                  "装箱序号",
+              alignment: Alignment.centerLeft,
+              child: new Text(
+                "内容",
+                maxLines: 1,
               ),
             ),
             flex: 3,

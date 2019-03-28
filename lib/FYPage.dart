@@ -52,7 +52,7 @@ class _FYPageState extends State<FYPage>{
     return new Material(
       child: new Scaffold(
         appBar: AppBar(
-          title: Text("待发货"),
+          title: Text("出库拣配"),
           actions: <Widget>[
             IconButton(icon: Icon(Icons.computer), onPressed: (){
               clearLogin();
