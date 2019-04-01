@@ -26,8 +26,6 @@ class ZXPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     this.context = context;
-    //初始化不显示加载框
-//    _streamControllerDialog.sink.add(false);
     return new WillPopScope(
         child: new Scaffold(
             appBar: new AppBar(
@@ -35,7 +33,7 @@ class ZXPage extends StatelessWidget {
                 _showAlert();
               }),
               actions: <Widget>[
-                IconButton(icon: Icon(Icons.cloud_download),onPressed: (){
+                IconButton(icon: Icon(Icons.cloud_upload),onPressed: (){
                   _connectRemoveBill();
                 },)
               ],
@@ -113,8 +111,8 @@ class ZXPage extends StatelessWidget {
     );
   }
 
-
-  Future<void> _showLoading(BuildContext context) async{
+  //使用showdialog的方法显示可以使用Navigator.pop(context);的方法取消dialog
+  Future<void> _showUpLoading(BuildContext context) async{
     return showDialog<void>(
         context: context,
         barrierDismissible: false,
@@ -128,8 +126,7 @@ class ZXPage extends StatelessWidget {
 
   //net request to connect 移库单
   Future<void> _connectRemoveBillRequest(removeBillText) async{
-//    _streamControllerDialog.sink.add(true);
-    _showLoading(context);
+    _showUpLoading(context);
     //获取装箱号
     String ZXNumbers = "";
     for(ZXData data in zxlist){
@@ -220,7 +217,16 @@ class ListViewAndScanState extends State<ListViewAndScan>{
 
   @override
   Widget build(BuildContext context) {
-    return _buildListViewAndScanState();
+    return zxlist.length == 0?_showLoading():_buildListViewAndScanState();
+  }
+
+  //显示加载数据的菊花
+  Widget _showLoading(){
+    return Center(
+      child: CupertinoActivityIndicator(
+        radius: 20,
+      ),
+    );
   }
 
   Widget _buildListViewAndScanState(){

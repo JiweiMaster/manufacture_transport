@@ -92,11 +92,11 @@ class _FYPageState extends State<FYPage>{
     titleMap['scarr']='承运商';
     list.add(FyInfoListItem(titleMap));
     mapJosn.forEach((map) => {
-    list.add(FyInfoListItem(map))
+      list.add(FyInfoListItem(map))
     });
-    print(list);
     _streamController.sink.add(list);
   }
+
 }
 
 Widget _showList(_streamController){

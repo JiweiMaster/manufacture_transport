@@ -54,6 +54,7 @@ class _SelectorState extends State<Selector>{
     return items;
   }
   var value;
+
   @override
   Widget build(BuildContext context) {
     return new Container(
