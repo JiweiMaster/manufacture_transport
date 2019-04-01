@@ -402,6 +402,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
     try{
       final String FYNumberUrl = NetApi.GetTransportZXDataUrl+"?fyNumber="+fyInfoListItem.shno;
       zxlist.clear();
+      allScanedCode.clear();
       var httpClient = new HttpClient();
       var request = await httpClient.getUrl(Uri.parse(FYNumberUrl));
       var response = await request.close();
@@ -438,7 +439,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
           if(zxData.mtno == barcodeDataShort){//判断短码是否符合条件
             if(!allScanedCode.contains(barcodeDataLong)){
               zxData.haveCode = (int.parse(zxData.haveCode)+1).toString();
-              allScanedCode.add(barcodeDataLong);//保留长码的扫描激励
+              allScanedCode.add(barcodeDataLong);//保留长码的扫描记录
               break;
             }else{
               ToastUtil.print("该码已经被扫描过");
