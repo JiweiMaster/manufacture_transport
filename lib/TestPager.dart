@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:manufacture_transport/widget/SearchEditText.dart';
+import 'package:manufacture_transport/widget/datePicker.dart';
 
 void main() => runApp(TestPage());
 
@@ -13,23 +16,21 @@ class TestPage extends StatefulWidget{
 }
 
 class TestPageState extends State<TestPage>{
+
   @override
   Widget build(BuildContext context) {
-    getVersion();
     return new MaterialApp(
       home: Scaffold(
         appBar: AppBar(title: Text("标题"),),
-        body: Text("hahha"),
+        body: new Container(
+          child: new Column(
+            children: <Widget>[
+              new SearchEditText(),
+            ],
+          )
+        ),
       ),
     );
-  }
-
-  Future<void> getVersion() async {
-    String updateUrl = "http://106.14.14.212:8002/apk?format=json";
-//    String updateUrl = "http://www.baidu.com";
-    var dio = new Dio();
-    Response response = await dio.get(updateUrl);
-    print(response.data);
   }
 }
 

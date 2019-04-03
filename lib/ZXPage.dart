@@ -1,36 +1,35 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:barcode_scan/barcode_scan.dart';
-import 'package:flutter/services.dart';
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:manufacture_transport/loading_dialog/ProgressDialog.dart';
+import 'package:manufacture_transport/Zxpage/removeBillDialog.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
-import 'package:manufacture_transport/model/MyUtil.dart';
-import 'package:manufacture_transport/model/NetApi.dart';
+import 'package:manufacture_transport/model/ZXItemData.dart';
 import 'package:manufacture_transport/widget/ZXIndictor.dart';
 
-
 String barcode = "";
-List<ZXData> zxlist = new List();
+List<ZXItemData> zxlist = new List();
 List<String> allScanedCode = new List();
 //承运商
 class ZXPage extends StatelessWidget {
   ZXPage({Key key,@required this.fyInfoListItem}):super(key: key);
   final FyInfoListItem fyInfoListItem;
   TextEditingController _removeBillTextController = TextEditingController();
+  TextEditingController _operatorController = TextEditingController();
+  TextEditingController _additionalController = TextEditingController();
+
   BuildContext context;
   @override
   Widget build(BuildContext context) {
     this.context = context;
-    return new WillPopScope(
+    print(fyInfoListItem.scarr);
+    zxlist.clear();
+    zxlist.addAll(fyInfoListItem.zxItemDatas);
+    return new Material(
         child: new Scaffold(
             appBar: new AppBar(
               leading: IconButton(icon: Icon(Icons.arrow_back), onPressed: () {
-                _showAlert();
+                Navigator.pop(context);
               }),
               actions: <Widget>[
                 IconButton(icon: Icon(Icons.cloud_upload),onPressed: (){
@@ -39,7 +38,6 @@ class ZXPage extends StatelessWidget {
               ],
               title: new Text(fyInfoListItem.shno),
             ),
-
             body: Stack(
               children: <Widget>[
                 new Column(
@@ -56,14 +54,16 @@ class ZXPage extends StatelessWidget {
               ],
             )
         ),
-        onWillPop: _exit);
+        );
   }
+
+
 
   Future<void> _connectRemoveBill() async{
     //判断装箱数据和已经扫码的数据是不是吻合的
     String content="";
-    for(ZXData zxData in zxlist){
-      if(zxData.pknm == zxData.haveCode){
+    for(ZXItemData zxData in zxlist){
+      if(zxData.pknm == zxData.haveCode.toString()){
       }else{
         //需要发货和扫码数量对不上
         content = content +zxData.mtno+"发货扫码数据不吻合";
@@ -74,7 +74,7 @@ class ZXPage extends StatelessWidget {
       barrierDismissible: false,
       builder: (BuildContext context){
         return CupertinoAlertDialog(
-          title: Text("关联移库单"),
+          title: Text("创建并关联移库单"),
           content: Card(
             elevation: 0.0,
             child: Column(
@@ -85,6 +85,8 @@ class ZXPage extends StatelessWidget {
                   color: Color.fromARGB(255, 250, 250, 250),
                   child: Text(content,style: new TextStyle(color: Colors.red),),
                 ),
+                new RemoveBillSelector(),
+                //移库单号
                 TextField(
                   controller: _removeBillTextController,
                   decoration: InputDecoration(
@@ -92,6 +94,23 @@ class ZXPage extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.grey.shade50),
                 ),
+                //下单人
+                TextField(
+                  controller: _operatorController,
+                  decoration: InputDecoration(
+                      labelText: "输入下单人",
+                      filled: true,
+                      fillColor: Colors.grey.shade50),
+                ),
+                //备注
+                TextField(
+                  controller: _additionalController,
+                  decoration: InputDecoration(
+                      labelText: "备注",
+                      filled: true,
+                      fillColor: Colors.grey.shade50),
+                ),
+
               ],
             ),
           ),
@@ -103,7 +122,13 @@ class ZXPage extends StatelessWidget {
               Navigator.of(context).pop();
               //进行网络操作去关联移库单
               String removeBill = _removeBillTextController.text.toString();//获取移库单号
-              _connectRemoveBillRequest(removeBill);//去进行网络请求
+              String operatorText = _operatorController.text.toString();
+              String additionalText = _additionalController.text.toString();
+
+              _connectRemoveBillRequest(removeBill,operatorText,additionalText,
+                  RemoveBillSelectorState.FRWHValue,//源仓库
+                  RemoveBillSelectorState.TOWHValue,//目的仓库
+                  RemoveBillSelectorState.MVFGValue);//传递标志-->去进行网络请求
             }, child: Text('确认关联')),
           ],
         );
@@ -125,65 +150,43 @@ class ZXPage extends StatelessWidget {
   }
 
   //net request to connect 移库单
-  Future<void> _connectRemoveBillRequest(removeBillText) async{
-    _showUpLoading(context);
+  Future<void> _connectRemoveBillRequest(removeBillText,operator,additional,sourceHub,destHub,mvFlag) async{
+//    _showUpLoading(context);
+    //先进行移库单的操作
+    print(removeBillText +"=>"+
+        operator +"=>"+
+        additional +"=>"+
+        sourceHub +"=>"+
+        destHub +"=>"+
+        mvFlag);
     //获取装箱号
-    String ZXNumbers = "";
-    for(ZXData data in zxlist){
-      ZXNumbers=ZXNumbers+data.mtno+",";
-    }
-    ZXNumbers = ZXNumbers.substring(0,ZXNumbers.length-1);
-    //发起网络请求，去关联服务单
-    var httpClient = new HttpClient();
-    var request = await httpClient.getUrl(Uri.parse(NetApi.connectRemoveHubBillUrl
-        +"?YKNumber="+removeBillText+"&ZXNumbers="+ZXNumbers));
-    var response = await request.close();
-    var responseBody = await response.transform(utf8.decoder).join();
-    Navigator.pop(context);
-    if(responseBody == "关联移库单成功"){
-      Navigator.pop(context,""+fyInfoListItem.shno);//将数据返回回去
-    }else if(responseBody == "关联移库单失败"){
-      ToastUtil.print("关联移库单失败");
-    }else{
-      ToastUtil.print(responseBody);
-    }
+//    String ZXNumbers = "";
+//    for(ZXData data in zxlist){
+//      ZXNumbers=ZXNumbers+data.mtno+",";
+//    }
+//    ZXNumbers = ZXNumbers.substring(0,ZXNumbers.length-1);
+//    //发起网络请求，去关联服务单
+//    var httpClient = new HttpClient();
+//    var request = await httpClient.getUrl(Uri.parse(NetApi.connectRemoveHubBillUrl
+//        +"?YKNumber="+removeBillText+"&ZXNumbers="+ZXNumbers));
+//    var response = await request.close();
+//    var responseBody = await response.transform(utf8.decoder).join();
+//    Navigator.pop(context);
+//    if(responseBody == "关联移库单成功"){
+//      Navigator.pop(context,""+fyInfoListItem.shno);//将数据返回回去
+//    }else if(responseBody == "关联移库单失败"){
+//      ToastUtil.print("关联移库单失败");
+//    }else{
+//      ToastUtil.print(responseBody);
+//    }
 //    await Future.delayed(Duration(seconds: 2), () {
 //    });
   }
-
-
-
-  Future<bool> _exit(){
-    _showAlert();
-
-    return new Future.value(false);
-  }
-
-  Future<void> _showAlert() async {
-    return showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return CupertinoAlertDialog(
-            title: Text('警告：\n 请检查该单号装箱是否完成，退出界面后不保存数据'),
-            actions: <Widget>[
-              new CupertinoButton(onPressed: () {
-                Navigator.of(context).pop();
-              }, child: Text('去检查')),
-              new CupertinoButton(onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pop(context);
-              }, child: Text('确认退出')),
-            ],
-          );
-        }
-    );
-  }
 }
 
-
 class ZXData{
-  ZXData(this.scarr,this.mtno,this.pknm,this.haveCode,this.maxValue,this.odno,this.odln,this.odnm,this.whls);
+  ZXData(this.carrier,this.scarr,this.mtno,this.pknm,this.haveCode,this.maxValue,this.odno,this.odln,this.odnm,this.whls);
+  String carrier;
   String scarr;//承运商
   String mtno;//物料的名称
   String pknm;//数量
@@ -212,7 +215,6 @@ class ListViewAndScanState extends State<ListViewAndScan>{
   @override
   void initState() {
     super.initState();
-    _GetTransportZXData(fyInfoListItem);
   }
 
   @override
@@ -236,13 +238,6 @@ class ListViewAndScanState extends State<ListViewAndScan>{
             child: _buildListView(),
             flex: 12
         ),
-        new Expanded(
-          child: new Container(
-            padding: EdgeInsets.only(top: 7,bottom: 7),
-            child: _buildScancode(),
-          ),
-          flex: 1,
-        ),
       ],
     );
   }
@@ -255,16 +250,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
         });
   }
 
-  Widget _buildScancode(){
-    return new Container(
-      child: new RaisedButton(
-        color: Colors.lightBlue,
-        onPressed: scan,
-        child: new Text("          扫描二维码          ",
-            style: new TextStyle(color: Colors.white)),
-      ),
-    );
-  }
+
 
   Future<void> showZXDetail(int position) async{
     return showDialog<void>(
@@ -278,7 +264,8 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                 new Text("装箱序号："+zxlist[position].mtno, style: new TextStyle(fontSize: 15),),
                 new Text("销售订单号："+zxlist[position].odno,style: new TextStyle(fontSize: 15),),
                 new Text("装箱内容："+zxlist[position].odnm,style: new TextStyle(fontSize: 15,),),
-                new Text("承运商："+zxlist[position].scarr,style: new TextStyle(fontSize: 15),),
+                new Text("一级承运商："+(zxlist[position].carrier=="2"?"世捷物流":"南瑞继保"),style: new TextStyle(fontSize: 15),),
+                new Text("二级承运商："+zxlist[position].scarr,style: new TextStyle(fontSize: 15),),
                 new Text("库位："+zxlist[position].whls,style: new TextStyle(fontSize: 15),),
               ],
             ),
@@ -311,14 +298,6 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                         children: <Widget>[
                           new Stack(
                             children: <Widget>[
-                              new SizedBox(
-                                height: 49,
-                                child: new LinearProgressIndicator(
-                                  value: (int.parse(zxlist[position].haveCode)/zxlist[position].maxValue),
-                                  backgroundColor: Colors.transparent,
-                                  valueColor: AlwaysStoppedAnimation(Color.fromARGB(255, 158, 158, 158)),
-                                ),
-                              ),
                               Container(
                                 height: 49,
                                 child: new Align(
@@ -330,7 +309,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                           margin: EdgeInsets.only(left: 5),
                                           child:new Text(
                                               zxlist[position].mtno,
-                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                              style: TextStyle(color: Colors.black)
                                           ),
                                         ),
                                         flex: 2,
@@ -341,7 +320,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                           alignment: Alignment.centerLeft,
                                           child: new Text(
                                             zxlist[position].odnm,
-                                            style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black),
+                                            style: TextStyle(color: Colors.black),
                                             maxLines: 2,
                                           ),
                                         ),
@@ -353,7 +332,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                           alignment: Alignment.center,
                                           child: new Text(
                                               zxlist[position].pknm,
-                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                              style: TextStyle(color: Colors.black)
                                           ),
                                           margin: EdgeInsets.only(right: 5),
                                         ),
@@ -363,8 +342,8 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                         child: new Container(
                                           alignment: Alignment.center,
                                           child: new Text(
-                                              zxlist[position].haveCode,
-                                              style: TextStyle(color: ((int.parse(zxlist[position].haveCode)/zxlist[position].maxValue)>=1)?Colors.white:Colors.black)
+                                              zxlist[position].haveCode.toString(),
+                                              style: TextStyle(color: Colors.black)
                                           ),
                                           margin: EdgeInsets.only(right: 5),
                                         ),
@@ -374,7 +353,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
                                         child: new Container(
                                           alignment: Alignment.center,
                                           child: new Text(
-                                              (int.parse(zxlist[position].haveCode)-int.parse(zxlist[position].pknm)).toString(),
+                                              (zxlist[position].haveCode-int.parse(zxlist[position].pknm)).toString(),
                                               style: TextStyle(color:Colors.red)
                                           ),
                                           margin: EdgeInsets.only(right: 5),
@@ -403,75 +382,7 @@ class ListViewAndScanState extends State<ListViewAndScan>{
     }
   }
 
-  //获取fy单号对应的物料信息
-  _GetTransportZXData(FyInfoListItem fyInfoListItem) async {
-    try{
-      final String FYNumberUrl = NetApi.GetTransportZXDataUrl+"?fyNumber="+fyInfoListItem.shno;
-      zxlist.clear();
-      allScanedCode.clear();
-      var httpClient = new HttpClient();
-      var request = await httpClient.getUrl(Uri.parse(FYNumberUrl));
-      var response = await request.close();
-      var responseBody = await response.transform(utf8.decoder).join();
-      List mapJosn = json.decode(responseBody);
-      mapJosn.forEach((map) => {
-      zxlist.add(ZXData(fyInfoListItem.scarr,map['mtno'],map['pknm'],"0",
-          double.parse(map['pknm']),map['odno'],map['odln'],map['odnm'],map['whls']))
-      });
-      setState(() {
-      });
-    }on SocketException{
-      Fluttertoast.showToast(
-        msg: "网络请求失败",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-      );
-    }
-  }
-  //进行扫码工作
-  Future scan() async {
-    try {
-      String barcodeDataLong = await BarcodeScanner.scan();
-      String barcodeDataShort;
-      //获取短码
-      if(barcodeDataLong.length != 10){
-        barcodeDataShort = barcodeDataLong.substring(0,10);
-      }else{
-        barcodeDataShort = barcodeDataLong;
-      }
-      setState((){
-        for(var zxData in zxlist){
-          if(zxData.mtno == barcodeDataShort){//判断短码是否符合条件
-            if(!allScanedCode.contains(barcodeDataLong)){
-              zxData.haveCode = (int.parse(zxData.haveCode)+1).toString();
-              allScanedCode.add(barcodeDataLong);//保留长码的扫描记录
-              break;
-            }else{
-              ToastUtil.print("该码已经被扫描过");
-            }
-          }
-        }
-      }
-      );
-    } on PlatformException catch (e) {
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
-        setState(() {
-          barcode = 'permission refused error';
-        });
-        ToastUtil.print("权限被拒绝");
-      } else {
-        setState(() => barcode = 'error');
-        ToastUtil.print("扫码失败");
-      }
-    } on FormatException{
-      setState(() => barcode = 'back');
-      ToastUtil.print("未扫码");
-    } catch (e) {
-      setState(() => barcode = 'error');
-      ToastUtil.print("扫码失败");
-    }
-  }
+
 }
 
 

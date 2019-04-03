@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:manufacture_transport/ZXPage.dart';
@@ -20,12 +19,6 @@ class _FYListViewState extends State<FYListView>{
   _FYListViewState(this._streamController);
   final StreamController<List<FyInfoListItem>> _streamController;
 
-
-  @override
-  void initState() {
-
-  }
-
   Widget _buildListView(List<FyInfoListItem> list) {
     return ListView.builder(
         itemCount: list == null ? 0 : list.length,
@@ -41,7 +34,9 @@ class _FYListViewState extends State<FYListView>{
         context,
         new MaterialPageRoute(
           builder: (context) =>
-          new ZXPage(fyInfoListItem:fyInfoListItem),));
+          new ZXPage(fyInfoListItem:fyInfoListItem),
+        )
+    );
     if(result != null){//如果返回的是实际的数据单，那么就会将原来的发运单号置成灰色
       for(FyInfoListItem data in fyInfoListItems){
         if(data.shno == result){
@@ -59,45 +54,60 @@ class _FYListViewState extends State<FYListView>{
     if (list != null) {
       return GestureDetector(
           onTap: () {
-            //跳转到下一个界面
-//            Navigator.push(
-//                context,
-//                new MaterialPageRoute(
-//                    builder: (context) =>
-//                    new ZXPage(fyInfoListItem: list[position]),));
             enterZXPager(context,list[position]);
           },
           child: Container(
               height: 50,
-              color: Color.fromARGB(255, 238, 238, 238),
+              color: Color.fromARGB(255, 250, 250, 250),
               child: new Column(
                 children: <Widget>[
-                  new Container(
-                    color: list[position].isComplete == true?Colors.grey:Color.fromARGB(255, 250, 250, 250),
-                    height: 49,
-                    padding: EdgeInsets.only(left: 10),
-                    child: new Align(
-                      alignment: new FractionalOffset(0.0, 0.5),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: new Text(list[position].shno,maxLines: 2,),
-                            flex: 2,
-                          ),
-                          Expanded(
-                            child: new Text(list[position].odno,maxLines: 2,),
-                            flex: 2,
-                          ),
-                          Expanded(
-                            child: new Text(list[position].pjnm,maxLines: 2,),
-                            flex: 3,
-                          ),
-                        ],
+                  new Stack(
+                    children: <Widget>[
+                      new SizedBox(
+                        height: 49,
+                        child: new LinearProgressIndicator(
+                          value: list[position].hadScanCode/list[position].sumCode,
+                          backgroundColor: Colors.transparent,
+                          valueColor: AlwaysStoppedAnimation(Color.fromARGB(255, 200, 200, 200)),
+                        ),
                       ),
-                    ),
-                  )
+                      new Column(
+                        children: <Widget>[
+                          new Container(
+                            height: 49,
+                            padding: EdgeInsets.only(left: 5,right:5),
+                            child: new Align(
+                              alignment: new FractionalOffset(0.0, 0.5),
+                              child: Row(
+                                children: <Widget>[
+                                  Expanded(
+                                    child: new Text(list[position].shno,maxLines: 2,),
+                                    flex: 2,
+                                  ),
+                                  Expanded(
+                                    child: new Text(list[position].sumCode.toString(),maxLines: 2,),
+                                    flex: 2,
+                                  ),
+                                  Expanded(
+                                    child: new Text(list[position].pjnm,maxLines: 2,),
+                                    flex: 3,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                  Container(
+                    height: 1,
+                    color: Color.fromARGB(255, 225, 225, 225),
+                  ),
                 ],
-              )));
+              )
+          )
+      );
     } else {
       return GestureDetector();
     }
@@ -120,7 +130,7 @@ class _FYListViewState extends State<FYListView>{
               if(list == null){
                 return _showLoading();
               }else{
-                return (list.length>0)?_buildListView(snapshot.data):_showLoading();
+                return (list.length>=0)?_buildListView(snapshot.data):_showLoading();
               }
             },
           ),
