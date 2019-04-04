@@ -12,9 +12,12 @@ class NetApi{
   //关联移库单
   static final String _connectRemoveHubBill = "/winningBid/Service1.asmx/ConnectYKNumber";
   static get connectRemoveHubBillUrl => StringServerurl+_connectRemoveHubBill;
-
+  //appupdate
   static get appUpdateAndroidUrl => "http://218.94.37.243:8081/winningBid/Service1.asmx/ManuTransAppDownload";
   static get appUpdateIOSUrl => "http://106.14.14.212:8002/apk?app=制造物流扫码Android&format=json";
 
-
+  //mycomputer
+  static get shnoInfoByShno => "http://192.168.38.91:8080/ManufactureTransport_war_exploded/GetFyInfoByShno";
+  //创建并且关联移库单
+  static get createAndConnectYKBill => "http://192.168.38.91:8080/ManufactureTransport_war_exploded/CreateAndConnectYKBill";
 }

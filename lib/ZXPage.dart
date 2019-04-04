@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:manufacture_transport/Zxpage/removeBillDialog.dart';
 import 'package:manufacture_transport/model/FyInfoListItem.dart';
+import 'package:manufacture_transport/model/MyUtil.dart';
+import 'package:manufacture_transport/model/NetApi.dart';
 import 'package:manufacture_transport/model/ZXItemData.dart';
 import 'package:manufacture_transport/widget/ZXIndictor.dart';
 
@@ -57,8 +62,6 @@ class ZXPage extends StatelessWidget {
         );
   }
 
-
-
   Future<void> _connectRemoveBill() async{
     //判断装箱数据和已经扫码的数据是不是吻合的
     String content="";
@@ -85,7 +88,6 @@ class ZXPage extends StatelessWidget {
                   color: Color.fromARGB(255, 250, 250, 250),
                   child: Text(content,style: new TextStyle(color: Colors.red),),
                 ),
-                new RemoveBillSelector(),
                 //移库单号
                 TextField(
                   controller: _removeBillTextController,
@@ -110,7 +112,7 @@ class ZXPage extends StatelessWidget {
                       filled: true,
                       fillColor: Colors.grey.shade50),
                 ),
-
+                new RemoveBillSelector(),
               ],
             ),
           ),
@@ -128,7 +130,8 @@ class ZXPage extends StatelessWidget {
               _connectRemoveBillRequest(removeBill,operatorText,additionalText,
                   RemoveBillSelectorState.FRWHValue,//源仓库
                   RemoveBillSelectorState.TOWHValue,//目的仓库
-                  RemoveBillSelectorState.MVFGValue);//传递标志-->去进行网络请求
+                  RemoveBillSelectorState.MVFGValue,
+                  RemoveBillSelectorState.LKTYValue);//传递标志-->去进行网络请求
             }, child: Text('确认关联')),
           ],
         );
@@ -150,35 +153,34 @@ class ZXPage extends StatelessWidget {
   }
 
   //net request to connect 移库单
-  Future<void> _connectRemoveBillRequest(removeBillText,operator,additional,sourceHub,destHub,mvFlag) async{
-//    _showUpLoading(context);
-    //先进行移库单的操作
-    print(removeBillText +"=>"+
-        operator +"=>"+
-        additional +"=>"+
-        sourceHub +"=>"+
-        destHub +"=>"+
-        mvFlag);
+  Future<void> _connectRemoveBillRequest(removeBillText,operator,additional,sourceHub,destHub,mvFlag,lkty) async{
+
+    _showUpLoading(context);
     //获取装箱号
-//    String ZXNumbers = "";
-//    for(ZXData data in zxlist){
-//      ZXNumbers=ZXNumbers+data.mtno+",";
-//    }
-//    ZXNumbers = ZXNumbers.substring(0,ZXNumbers.length-1);
-//    //发起网络请求，去关联服务单
-//    var httpClient = new HttpClient();
-//    var request = await httpClient.getUrl(Uri.parse(NetApi.connectRemoveHubBillUrl
-//        +"?YKNumber="+removeBillText+"&ZXNumbers="+ZXNumbers));
-//    var response = await request.close();
-//    var responseBody = await response.transform(utf8.decoder).join();
-//    Navigator.pop(context);
-//    if(responseBody == "关联移库单成功"){
-//      Navigator.pop(context,""+fyInfoListItem.shno);//将数据返回回去
-//    }else if(responseBody == "关联移库单失败"){
-//      ToastUtil.print("关联移库单失败");
-//    }else{
-//      ToastUtil.print(responseBody);
-//    }
+    String ZXNumbers = "";
+    for(ZXItemData zxItemData in zxlist){
+      ZXNumbers=ZXNumbers+zxItemData.mtno+",";
+    }
+    ZXNumbers = ZXNumbers.substring(0,ZXNumbers.length-1);//所有的装箱号
+
+    print(NetApi.createAndConnectYKBill
+        +"?shno=$removeBillText&frwh=$sourceHub&towh=$destHub&iner=$operator&mvfg=$mvFlag&comm=$additional&lkty=$lkty&zxnos=$ZXNumbers");
+    //发起网络请求，去关联服务单
+    var httpClient = new HttpClient();
+    var request = await httpClient.getUrl(Uri.parse(NetApi.createAndConnectYKBill
+        +"?shno=$removeBillText&frwh=$sourceHub&towh=$destHub&iner=$operator&mvfg=$mvFlag&comm=$additional&lkty=$lkty&zxnos=$ZXNumbers"));
+    var response = await request.close();
+    var responseBody = await response.transform(utf8.decoder).join();
+    Navigator.pop(context);
+    print(responseBody);
+
+    if(responseBody.toString().trim() == "关联移库单成功"){
+      Navigator.pop(context,""+fyInfoListItem.shno);//将数据返回回去
+    }else if(responseBody == "关联移库单失败"){
+      ToastUtil.print("关联移库单失败");
+    }else{
+      ToastUtil.print(responseBody);
+    }
 //    await Future.delayed(Duration(seconds: 2), () {
 //    });
   }

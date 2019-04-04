@@ -29,32 +29,39 @@ class _FYListViewState extends State<FYListView>{
 
   //进入下一个界面并且回去下一个界面返回的数据,
   // 如果返回的是FY单号，代表单号已经完成发运操作，将当前的发运单号置灰
-  void enterZXPager(BuildContext context,fyInfoListItem ) async{
-    String result = await Navigator.push(
-        context,
-        new MaterialPageRoute(
-          builder: (context) =>
-          new ZXPage(fyInfoListItem:fyInfoListItem),
-        )
-    );
-    if(result != null){//如果返回的是实际的数据单，那么就会将原来的发运单号置成灰色
-      for(FyInfoListItem data in fyInfoListItems){
-        if(data.shno == result){
-          data.isComplete = true;
-//          ToastUtil.print(result.toString());
-        }
-      }
-      List<FyInfoListItem> temp = new List();
-      temp.addAll(fyInfoListItems);
-      _streamController.sink.add(temp);
-    }
-  }
+//  void enterZXPager(BuildContext context,fyInfoListItem ) async{
+//    String result = await Navigator.push(
+//        context,
+//        new MaterialPageRoute(
+//          builder: (context) =>
+//          new ZXPage(fyInfoListItem:fyInfoListItem),
+//        )
+//    );
+//    if(result != null){//如果返回的是实际的数据单，那么就会将原来的发运单号置成灰色
+//      for(FyInfoListItem data in fyInfoListItems){
+//        if(data.shno == result){
+//          data.isComplete = true;
+////          ToastUtil.print(result.toString());
+//        }
+//      }
+//      List<FyInfoListItem> temp = new List();
+//      temp.addAll(fyInfoListItems);
+//      _streamController.sink.add(temp);
+//    }
+//  }
 
   Widget _buildListViewItem(BuildContext context, List<FyInfoListItem> list, int position) {
     if (list != null) {
       return GestureDetector(
           onTap: () {
-            enterZXPager(context,list[position]);
+//            enterZXPager(context,list[position]);
+            Navigator.push(
+                context,
+                new MaterialPageRoute(
+                  builder: (context) =>
+                  new ZXPage(fyInfoListItem:list[position]),
+                )
+            );
           },
           child: Container(
               height: 50,

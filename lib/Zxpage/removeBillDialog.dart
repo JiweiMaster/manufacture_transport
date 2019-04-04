@@ -7,11 +7,11 @@ class RemoveBillDialog{
     List<DropdownMenuItem> items = new List();
     DropdownMenuItem dropdownMenuItem0=new DropdownMenuItem(
       child:new Text('南瑞继保'),
-      value: '0',
+      value: '1',
     );
     DropdownMenuItem dropdownMenuItem1=new DropdownMenuItem(
       child:new Text('世捷物流'),
-      value: '1',
+      value: '2',
     );
     items.add(dropdownMenuItem0);
     items.add(dropdownMenuItem1);
@@ -23,11 +23,11 @@ class RemoveBillDialog{
     List<DropdownMenuItem> items = new List();
     DropdownMenuItem dropdownMenuItem0=new DropdownMenuItem(
       child:new Text('南瑞继保'),
-      value: '0',
+      value: '1',
     );
     DropdownMenuItem dropdownMenuItem1=new DropdownMenuItem(
       child:new Text('世捷物流'),
-      value: '1',
+      value: '2',
     );
     items.add(dropdownMenuItem0);
     items.add(dropdownMenuItem1);
@@ -39,29 +39,45 @@ class RemoveBillDialog{
     List<DropdownMenuItem> items = new List();
     DropdownMenuItem dropdownMenuItem0=new DropdownMenuItem(
       child:new Text('初始'),
-      value: '0',
+      value: '1',
     );
     DropdownMenuItem dropdownMenuItem1=new DropdownMenuItem(
       child:new Text('下达'),
-      value: '1',
+      value: '2',
     );
     DropdownMenuItem dropdownMenuItem2=new DropdownMenuItem(
       child:new Text('传递'),
-      value: '2',
+      value: '3',
     );
     DropdownMenuItem dropdownMenuItem3=new DropdownMenuItem(
       child:new Text('完成'),
-      value: '3',
+      value: '4',
     );
     DropdownMenuItem dropdownMenuItem4=new DropdownMenuItem(
       child:new Text('取消'),
-      value: '4',
+      value: '5',
     );
     items.add(dropdownMenuItem0);
     items.add(dropdownMenuItem1);
     items.add(dropdownMenuItem2);
     items.add(dropdownMenuItem3);
     items.add(dropdownMenuItem4);
+    return items;
+  }
+
+  //获取关联标志
+  static List<DropdownMenuItem> getLKTY(){
+    List<DropdownMenuItem> items = new List();
+    DropdownMenuItem dropdownMenuItem0=new DropdownMenuItem(
+      child:new Text('普通方式'),
+      value: '1',
+    );
+    DropdownMenuItem dropdownMenuItem1=new DropdownMenuItem(
+      child:new Text('集装方式'),
+      value: '2',
+    );
+    items.add(dropdownMenuItem0);
+    items.add(dropdownMenuItem1);
     return items;
   }
 }
@@ -78,9 +94,11 @@ class RemoveBillSelectorState extends State<RemoveBillSelector>{
   static String _FRWHValue;
   static String _TOWHValue;
   static String _MVFGValue;
+  static String _LKTYValue;
   static get FRWHValue => _FRWHValue;
   static get TOWHValue => _TOWHValue;
   static get MVFGValue => _MVFGValue;
+  static get LKTYValue => _LKTYValue;
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +154,24 @@ class RemoveBillSelectorState extends State<RemoveBillSelector>{
                   onChanged: (T){
                     setState(() {
                       _MVFGValue = T;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          new Container(
+            alignment: Alignment.centerLeft,
+            child: new Row(
+              children: <Widget>[
+                new Text("关联方式：",style: new TextStyle(fontSize: 17),),
+                new DropdownButton(
+                  items: RemoveBillDialog.getLKTY(),
+                  hint: new Text("选择关联方式"),
+                  value: _LKTYValue,
+                  onChanged: (T){
+                    setState(() {
+                      _LKTYValue = T;
                     });
                   },
                 ),

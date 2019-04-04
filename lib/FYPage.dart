@@ -103,7 +103,6 @@ class _FYPageState extends State<FYPage>{
         }
     );
   }
-
   //通过订单号来查询
   Future<void> _showShnoDialog() async {
     TextEditingController _shnoTextController = TextEditingController();
@@ -115,11 +114,11 @@ class _FYPageState extends State<FYPage>{
             title: Text('通过发运单查询'),
             content: new Material(
               child: new Container(
-                color: Color.fromARGB(255, 246, 246, 246),
                 child: new Column(
                   children: <Widget>[
-                    Text('多个发运单使用英文逗号逗号隔开',style: new TextStyle(color: Colors.red)),
+                    Text('多个发运单使用英文逗号隔开,大小写都可',style: new TextStyle(color: Colors.red)),
                     TextField(
+                      maxLines: 3,
                       controller: _shnoTextController,
                     )
                   ],
@@ -132,7 +131,7 @@ class _FYPageState extends State<FYPage>{
               }, child: Text('取消')),
               new CupertinoButton(onPressed: () {
                 Navigator.of(context).pop();
-//                _streamController.sink.add(null);
+                _streamController.sink.add(null);
                 getFYInfoByShno(_shnoTextController.text.toString());
               }, child: Text('搜索')),
             ],
@@ -140,7 +139,6 @@ class _FYPageState extends State<FYPage>{
         }
     );
   }
-
   void clearLogin() async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool("isFirstLogin", true);
@@ -149,48 +147,69 @@ class _FYPageState extends State<FYPage>{
   Future<void> exitApp() async {
     await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
   }
-
   Widget _showList(){
     return new Column(
       children: <Widget>[
         new Container(
-          margin: EdgeInsets.only(left: 10,right: 10),
-          child: new Row(
+          child: new Column(
             children: <Widget>[
-              Text("承运商："),
-              Container(
-                margin: EdgeInsets.only(left: 5),
-                child: Selector(
-                    onSelected:(value){
-                      //为了显示菊花的加载界面
-                      _streamController.sink.add(null);
-                      fyCompany = value;
-                      //刷新网络请求
-                      getFYInfoByTransportCompany(fyCompany);
-                    }
+              new Container(
+                margin: EdgeInsets.only(left: 10,right: 10),
+                height: 49.5,
+                child: new Row(
+                  children: <Widget>[
+                    Text("承运商："),
+                    Container(
+                      margin: EdgeInsets.only(left: 5),
+                      child: Selector(
+                          onSelected:(value){
+                            //为了显示菊花的加载界面
+                            _streamController.sink.add(null);
+                            fyCompany = value;
+                            //刷新网络请求
+                            getFYInfoByTransportCompany(fyCompany);
+                          }
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 5),
+                      child: new Text("总箱数："+sumPackages.toString()),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 5),
+                      child: new Text("已扫码："+haveScanPackages.toString()),
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(left: 5),
-                child: new Text("总箱数："+sumPackages.toString()),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 5),
-                child: new Text("已扫码："+haveScanPackages.toString()),
-              ),
+              new Container(
+                height: 0.5,
+                color: Color.fromARGB(255, 220, 220, 220),
+              )
             ],
-          ),
-          height: 50,
+          )
         ),
         new Container(
-          margin: EdgeInsets.only(left: 5,right: 5),
-          child: new Row(
+          height: 50,
+          child: new Column(
             children: <Widget>[
-              new Expanded(child: new Text("发运号"),flex: 2,),
-              new Expanded(child: new Text("装箱数"),flex: 2,),
-              new Expanded(child: new Text("项目名称"),flex: 3,)
+              new Container(
+                margin: EdgeInsets.only(left: 5,right: 5),
+                height: 49.5,
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(child: new Text("发运号"),flex: 2,),
+                    new Expanded(child: new Text("装箱数"),flex: 2,),
+                    new Expanded(child: new Text("项目名称"),flex: 3,)
+                  ],
+                ),
+              ),
+              new Container(
+                height: 0.5,
+                color: Color.fromARGB(255, 220, 220, 220),
+              )
             ],
-          ),
+          )
         ),
         new Expanded(
           child: FYListView(_streamController),
@@ -247,6 +266,10 @@ class _FYPageState extends State<FYPage>{
     var response = await request.close();
     var responseBody = await response.transform(utf8.decoder).join();
     List mapJosn = json.decode(responseBody);
+    sumPackages = 0;
+    if(mapJosn.length == 0){
+      sumPackages = 0;
+    }
     mapJosn.forEach((map) => {
       list.add(FyInfoListItem(map))
     });
@@ -257,34 +280,33 @@ class _FYPageState extends State<FYPage>{
     allFYList.addAll(list);
     setState(() {
     });
-    print(sumPackages);
     _streamController.sink.add(list);
   }
 
   //根据发运单号获取数据
   Future<void> getFYInfoByShno(String shnos) async{
-    print(shnos);
-//    List<FyInfoListItem> list = new List();
-//    var httpClient = new HttpClient();
-//    print(fycompany);
-//    String url = NetApi.GET_FYINFO_BY_TRANSPORTCOMPANY+"?fycompany="+fycompany;
-//    print(url);
-//    var request = await httpClient.getUrl(Uri.parse(url));
-//    var response = await request.close();
-//    var responseBody = await response.transform(utf8.decoder).join();
-//    List mapJosn = json.decode(responseBody);
-//    mapJosn.forEach((map) => {
-//    list.add(FyInfoListItem(map))
-//    });
-//    for(FyInfoListItem fyInfoListItem in list){
-//      sumPackages = sumPackages + fyInfoListItem.sumCode;
-//    }
-//    allFYList.clear();
-//    allFYList.addAll(list);
-//    setState(() {
-//    });
-//    print(sumPackages);
-//    _streamController.sink.add(list);
+    sumPackages=0;
+    shnos = shnos.toUpperCase();//全部转换成大写
+    List<FyInfoListItem> list = new List();
+    var httpClient = new HttpClient();
+    String url = NetApi.shnoInfoByShno+"?shnos="+shnos;
+    print(url);
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    var responseBody = await response.transform(utf8.decoder).join();
+    List mapJosn = json.decode(responseBody);
+    mapJosn.forEach((map) => {
+    list.add(FyInfoListItem(map))
+    });
+    for(FyInfoListItem fyInfoListItem in list){
+      sumPackages = sumPackages + fyInfoListItem.sumCode;
+    }
+    allFYList.clear();
+    allFYList.addAll(list);
+    setState(() {
+    });
+    print(sumPackages);
+    _streamController.sink.add(list);
   }
 }
 
