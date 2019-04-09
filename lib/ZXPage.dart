@@ -79,13 +79,13 @@ class ZXPage extends StatelessWidget {
         return CupertinoAlertDialog(
           title: Text("创建并关联移库单"),
           content: Card(
+            color: Color.fromARGB(255, 248, 248, 248),
             elevation: 0.0,
             child: Column(
               children: <Widget>[
                 Container(
                   alignment: Alignment.center,
                   width: double.infinity,
-                  color: Color.fromARGB(255, 250, 250, 250),
                   child: Text(content,style: new TextStyle(color: Colors.red),),
                 ),
                 //移库单号
@@ -127,10 +127,10 @@ class ZXPage extends StatelessWidget {
               String operatorText = _operatorController.text.toString();
               String additionalText = _additionalController.text.toString();
 
-              _connectRemoveBillRequest(removeBill,operatorText,additionalText,
+              _connectRemoveBillRequest(removeBill.toUpperCase(),operatorText,additionalText,
                   RemoveBillSelectorState.FRWHValue,//源仓库
                   RemoveBillSelectorState.TOWHValue,//目的仓库
-                  RemoveBillSelectorState.MVFGValue,
+                  "1",//传递标志只能是1，由于下面需要对移库单的校验
                   RemoveBillSelectorState.LKTYValue);//传递标志-->去进行网络请求
             }, child: Text('确认关联')),
           ],
@@ -154,7 +154,6 @@ class ZXPage extends StatelessWidget {
 
   //net request to connect 移库单
   Future<void> _connectRemoveBillRequest(removeBillText,operator,additional,sourceHub,destHub,mvFlag,lkty) async{
-
     _showUpLoading(context);
     //获取装箱号
     String ZXNumbers = "";
@@ -164,7 +163,8 @@ class ZXPage extends StatelessWidget {
     ZXNumbers = ZXNumbers.substring(0,ZXNumbers.length-1);//所有的装箱号
 
     print(NetApi.createAndConnectYKBill
-        +"?shno=$removeBillText&frwh=$sourceHub&towh=$destHub&iner=$operator&mvfg=$mvFlag&comm=$additional&lkty=$lkty&zxnos=$ZXNumbers");
+        +"?shno=$removeBillText&frwh=$sourceHub&towh=$destHub&iner=$operator"+
+            "&mvfg=$mvFlag&comm=$additional&lkty=$lkty&zxnos=$ZXNumbers");
     //发起网络请求，去关联服务单
     var httpClient = new HttpClient();
     var request = await httpClient.getUrl(Uri.parse(NetApi.createAndConnectYKBill

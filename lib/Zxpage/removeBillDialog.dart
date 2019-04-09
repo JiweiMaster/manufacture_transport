@@ -142,24 +142,24 @@ class RemoveBillSelectorState extends State<RemoveBillSelector>{
               ],
             )
           ),
-          new Container(
-            alignment: Alignment.centerLeft,
-            child: new Row(
-              children: <Widget>[
-                new Text("传递标志：",style: new TextStyle(fontSize: 17),),
-                new DropdownButton(
-                  items: RemoveBillDialog.getMVFG(),
-                  hint: new Text("选择传递标志"),
-                  value: _MVFGValue,
-                  onChanged: (T){
-                    setState(() {
-                      _MVFGValue = T;
-                    });
-                  },
-                ),
-              ],
-            ),
-          ),
+//          new Container(
+//            alignment: Alignment.centerLeft,
+//            child: new Row(
+//              children: <Widget>[
+//                new Text("传递标志：",style: new TextStyle(fontSize: 17),),
+//                new DropdownButton(
+//                  items: RemoveBillDialog.getMVFG(),
+//                  hint: new Text("选择传递标志"),
+//                  value: _MVFGValue,
+//                  onChanged: (T){
+//                    setState(() {
+//                      _MVFGValue = T;
+//                    });
+//                  },
+//                ),
+//              ],
+//            ),
+//          ),
           new Container(
             alignment: Alignment.centerLeft,
             child: new Row(
